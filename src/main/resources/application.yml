@@ -1,0 +1,26 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /sharding
+spring:
+  main:
+    allow-bean-definition-overriding: true
+sharding:
+  jdbc:
+    datasource:
+      names: master
+      master:
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        type: com.alibaba.druid.pool.DruidDataSource
+        url: jdbc:mysql://localhost:3306/sharding-jdbc?characterEncoding=utf-8
+        username: root
+        password: mima520.
+    config:
+      sharding:
+        tables:
+          user:
+            actual-data-nodes: master.user_${1..2}
+            table-strategy:
+              inline:
+                algorithm-expression: user_${id.longValue() % 2}
+                sharding-column: id
