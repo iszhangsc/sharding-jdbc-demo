@@ -4,7 +4,12 @@ server:
     context-path: /sharding
 spring:
   main:
+    # 多数据源必须配置这个。允许一个实体类配置使用多张表，覆盖.
     allow-bean-definition-overriding: true
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+# sharding-jdbc配置
 sharding:
   jdbc:
     datasource:
@@ -12,15 +17,25 @@ sharding:
       master:
         driver-class-name: com.mysql.cj.jdbc.Driver
         type: com.alibaba.druid.pool.DruidDataSource
-        url: jdbc:mysql://localhost:3306/sharding-jdbc?characterEncoding=utf-8
-        username: root
-        password: mima520.
+        url: ENC(6/Ot/5DrBo7igGtg0TQT6ScFP8t45OaLs0mkPUKYJa1qsrQQfoRKEqNu0Es7nfZCLDjUgiKLBtJCyMO3vRmewDGNLMpDdv5uxf1xJc8r/HCHU9ZFOxx2z/hd2mvkNOzsUZj03ir/roHb5EQ3Z/m6fofBlssR9EJNSva7d5vp9NMqn7Le5LBZRA==)
+        username: ENC(ohfPGqHrP7Oclch+kEqwZQ==)
+        password: ENC(MSEkyTwrqHsN/rNgqJld4tkEVc48ypZL)
     config:
       sharding:
         tables:
           user:
-            actual-data-nodes: master.user_${1..2}
+            # 表名称节点配置
+            actual-data-nodes: master.user_$->{1..2}
+            # user表主键策略
+            key-generator:
+              column: id
+              type: SNOWFLAKE
+            # 分片策略
             table-strategy:
               inline:
-                algorithm-expression: user_${id.longValue() % 2}
+                algorithm-expression: user_$->{id % 2 - 1}
                 sharding-column: id
+
+jasypt:
+  encryptor:
+    password: abcdefgjkl

@@ -42,14 +42,16 @@ public class UserController {
 
     @PostMapping("/save")
     @ApiOperation(value = "保存用户")
-    public int save(@RequestBody User user) {
-        return userMapper.insert(user);
+    public User save(@RequestBody User user) {
+        userMapper.insert(user);
+        return user;
     }
 
     @PutMapping("/update")
     @ApiOperation(value = "修改用户")
-    public int update(@RequestBody User user) {
-        return userMapper.updateById(user);
+    public User update(@RequestBody User user) {
+        userMapper.updateById(user);
+        return user;
     }
 
     @DeleteMapping("/delete/{id}")
