@@ -1,0 +1,43 @@
+# sharding-jdbc单库下的水平分表配置,主键为奇数的放在user_1表中,主键为偶数放在user_2表中.
+sharding:
+  jdbc:
+    datasource:
+      # 数据源名称，多数据源以逗号分隔
+      names: master
+      master:
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        type: com.alibaba.druid.pool.DruidDataSource
+        # 这里采用`jasypt`加密连接信息，开头都是 `ENC(` 结尾都是  `)`
+        url: ENC(wPSvHLn3Wm25SGH/f1hA7rnSrWkfnV73XrauSDy+4ZPISNq/3dJRt8fjIattv3J8MGg64dX0FAWoeT/fyKPN4+/QUGP29k23wIORiX6ncVe6Kd1UY09JQsP9Rc7Rs1ZAa8r3lm/mUMJtqp5silZIAhyVz6GwoeBc7Q4rcKbqhXLSVtrD7/bapA==)
+        username: ENC(ohfPGqHrP7Oclch+kEqwZQ==)
+        password: ENC(MSEkyTwrqHsN/rNgqJld4tkEVc48ypZL)
+    config:
+      sharding:
+        # 表配置
+        tables:
+          # 表名
+          user:
+            # 数据源名称下对应的真实表名 user_1, user_2
+            actual-data-nodes: master.user_$->{1..2}
+            # user表主键策略
+            key-generator:
+              # 主键字段.
+              column: id
+              # 使用雪花算法
+              type: SNOWFLAKE
+            # 分片策略
+            table-strategy:
+              inline:
+                # 取模,然后采用三目运算.将奇数ID写入user_1,偶数ID写入user_2中.
+                # 这里还可以使用其他算法生成10张表(user_0,user_1,..........,user_9)，其算法为: user_$->{id % 10}
+                algorithm-expression: user_$->{(id % 2 == 0 ? 2:1)}
+                # 分片列
+                sharding-column: id
+      props:
+        sql:
+          # 是否开启SQL显示
+          show: true
+# 加密信息配置
+jasypt:
+  encryptor:
+    password: abcdefgjkl
